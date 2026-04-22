@@ -1,151 +1,405 @@
-<script>
-(() => {
-  try {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Rack Map Builder</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:#0b1320;
+      color:#fff;
+      padding:16px;
+      box-sizing:border-box;
+    }
 
-    const buildBtn = document.getElementById('buildBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const copyCsvBtn = document.getElementById('copyCsvBtn');
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+    }
 
-    const rackNumberEl = document.getElementById('rackNumber');
-    const shelfCountEl = document.getElementById('shelfCount');
-    const binsPerShelfEl = document.getElementById('binsPerShelf');
-    const defaultPositionsEl = document.getElementById('defaultPositions');
+    h1{
+      margin:0 0 16px;
+      font-size:28px;
+    }
 
-    const rackMap = document.getElementById('rackMap');
-    const binListBody = document.getElementById('binListBody');
+    .panel{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:16px;
+    }
 
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
-    let rackState = [];
+    .grid{
+      display:grid;
+      gap:10px;
+    }
 
-    function pad2(v){ return String(v).padStart(2,'0'); }
-    function shelfLetter(i){ return alphabet[i] || 'z'; }
+    .grid-2{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
 
-    function buildState(){
-      rackState = [];
-      const rack = parseInt(rackNumberEl.value || '1');
-      const shelves = parseInt(shelfCountEl.value || '1');
-      const bins = parseInt(binsPerShelfEl.value || '1');
-      const positions = parseInt(defaultPositionsEl.value || '1');
+    label{
+      display:block;
+      font-size:13px;
+      margin-bottom:6px;
+      color:#b8c2d0;
+    }
 
-      for(let s=0;s<shelves;s++){
-        for(let b=0;b<bins;b++){
-          rackState.push({
-            rack,
-            shelfIndex:s,
-            binIndex:b,
-            positions
+    input, select, button{
+      width:100%;
+      min-height:44px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.15);
+      background:#111a28;
+      color:#fff;
+      padding:0 12px;
+      box-sizing:border-box;
+      font-size:15px;
+    }
+
+    button{
+      background:#c62828;
+      border-color:#c62828;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    button.secondary{
+      background:#1a2433;
+      border-color:rgba(255,255,255,.15);
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .actions button{
+      width:auto;
+      min-width:140px;
+      padding:0 16px;
+    }
+
+    .map{
+      overflow:auto;
+      margin-top:12px;
+    }
+
+    .shelfRow{
+      display:grid;
+      gap:8px;
+      margin-bottom:8px;
+      min-width:max-content;
+    }
+
+    .cell{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:10px;
+      padding:8px;
+      font-size:12px;
+    }
+
+    .shelfLabel{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      min-height:44px;
+    }
+
+    .binCode{
+      font-weight:700;
+      margin-bottom:8px;
+      line-height:1.3;
+    }
+
+    .tableWrap{
+      overflow:auto;
+      margin-top:12px;
+    }
+
+    table{
+      width:100%;
+      min-width:760px;
+      border-collapse:collapse;
+    }
+
+    th, td{
+      border-bottom:1px solid rgba(255,255,255,.10);
+      padding:8px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    th{
+      background:#121d2b;
+      position:sticky;
+      top:0;
+    }
+
+    td input{
+      min-height:38px;
+      font-size:14px;
+    }
+
+    .qrCell{
+      font-family:monospace;
+      font-size:12px;
+      color:#d7e4ff;
+      word-break:break-all;
+    }
+
+    @media (max-width:760px){
+      .grid-2{
+        grid-template-columns:1fr;
+      }
+
+      .actions{
+        flex-direction:column;
+      }
+
+      .actions button{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rack Map Builder</h1>
+
+    <div class="panel">
+      <div class="grid grid-2">
+        <div>
+          <label for="rack">Rack number</label>
+          <input id="rack" type="number" min="1" max="99" value="1"/>
+        </div>
+        <div>
+          <label for="shelves">Number of shelves</label>
+          <input id="shelves" type="number" min="1" max="26" value="4"/>
+        </div>
+        <div>
+          <label for="bins">Bins per shelf</label>
+          <input id="bins" type="number" min="1" max="99" value="6"/>
+        </div>
+        <div>
+          <label for="positions">Default positions per bin</label>
+          <input id="positions" type="number" min="1" max="26" value="1"/>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="buildBtn" type="button">Build Rack</button>
+        <button id="resetBtn" type="button" class="secondary">Reset</button>
+        <button id="copyCsvBtn" type="button" class="secondary">Copy CSV</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 style="margin:0 0 10px;">Rack Map</h2>
+      <div class="map" id="map"></div>
+    </div>
+
+    <div class="panel">
+      <h2 style="margin:0 0 10px;">Expanded Bin List</h2>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bin Location</th>
+              <th>Part Number</th>
+              <th>Description</th>
+              <th>Min Stock</th>
+              <th>Max Stock</th>
+              <th>QR Code</th>
+            </tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const alpha = "abcdefghijklmnopqrstuvwxyz".split("");
+      let state = [];
+
+      const rackEl = document.getElementById('rack');
+      const shelvesEl = document.getElementById('shelves');
+      const binsEl = document.getElementById('bins');
+      const positionsEl = document.getElementById('positions');
+
+      const buildBtn = document.getElementById('buildBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const copyCsvBtn = document.getElementById('copyCsvBtn');
+
+      const mapEl = document.getElementById('map');
+      const listEl = document.getElementById('list');
+
+      function pad(n){
+        return String(n).padStart(2,'0');
+      }
+
+      function shelfLetter(i){
+        return alpha[i] || 'z';
+      }
+
+      function compactCode(item){
+        if(item.pos === 1){
+          return `${item.rack}-${shelfLetter(item.s)}-${pad(item.b + 1)}-a`;
+        }
+        return `${item.rack}-${shelfLetter(item.s)}-${pad(item.b + 1)}-a:${alpha[item.pos - 1]}`;
+      }
+
+      function expand(item){
+        const out = [];
+        for(let i = 0; i < item.pos; i++){
+          out.push(`${item.rack}-${shelfLetter(item.s)}-${pad(item.b + 1)}-${alpha[i]}`);
+        }
+        return out;
+      }
+
+      function buildState(){
+        const rack = pad(Math.max(1, Math.min(99, parseInt(rackEl.value || '1', 10))));
+        const shelves = Math.max(1, Math.min(26, parseInt(shelvesEl.value || '1', 10)));
+        const bins = Math.max(1, Math.min(99, parseInt(binsEl.value || '1', 10)));
+        const pos = Math.max(1, Math.min(26, parseInt(positionsEl.value || '1', 10)));
+
+        state = [];
+
+        for(let s = 0; s < shelves; s++){
+          for(let b = 0; b < bins; b++){
+            state.push({
+              rack,
+              s,
+              b,
+              pos
+            });
+          }
+        }
+      }
+
+      function drawMap(){
+        mapEl.innerHTML = '';
+
+        const shelves = Math.max(1, Math.min(26, parseInt(shelvesEl.value || '1', 10)));
+        const bins = Math.max(1, Math.min(99, parseInt(binsEl.value || '1', 10)));
+
+        for(let s = 0; s < shelves; s++){
+          const row = document.createElement('div');
+          row.className = 'shelfRow';
+          row.style.gridTemplateColumns = `90px repeat(${bins}, minmax(120px, 1fr))`;
+
+          const label = document.createElement('div');
+          label.className = 'cell shelfLabel';
+          label.textContent = `Shelf ${shelfLetter(s)}`;
+          row.appendChild(label);
+
+          for(let b = 0; b < bins; b++){
+            const item = state.find(x => x.s === s && x.b === b);
+
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.innerHTML = `
+              <div class="binCode">${compactCode(item)}</div>
+              <select data-s="${s}" data-b="${b}">
+                ${[1,2,3,4,5].map(n => `<option value="${n}" ${item.pos === n ? 'selected' : ''}>${n} position${n === 1 ? '' : 's'}</option>`).join('')}
+              </select>
+            `;
+
+            row.appendChild(cell);
+          }
+
+          mapEl.appendChild(row);
+        }
+
+        mapEl.querySelectorAll('select').forEach(sel => {
+          sel.addEventListener('change', e => {
+            const s = parseInt(e.target.dataset.s, 10);
+            const b = parseInt(e.target.dataset.b, 10);
+            const item = state.find(x => x.s === s && x.b === b);
+            if(item){
+              item.pos = parseInt(e.target.value, 10);
+              drawMap();
+              drawList();
+            }
           });
-        }
-      }
-    }
-
-    function compactCode(r,s,b,p){
-      let end = alphabet[p-1] || 'a';
-      return p === 1
-        ? `${pad2(r)}-${shelfLetter(s)}-${pad2(b+1)}-a`
-        : `${pad2(r)}-${shelfLetter(s)}-${pad2(b+1)}-a:${end}`;
-    }
-
-    function expanded(r,s,b,p){
-      let out=[];
-      for(let i=0;i<p;i++){
-        out.push(`${pad2(r)}-${shelfLetter(s)}-${pad2(b+1)}-${alphabet[i]}`);
-      }
-      return out;
-    }
-
-    function renderMap(){
-      rackMap.innerHTML = '';
-
-      let shelves = parseInt(shelfCountEl.value || '1');
-      let bins = parseInt(binsPerShelfEl.value || '1');
-
-      for(let s=0;s<shelves;s++){
-        let row = document.createElement('div');
-        row.style.display='grid';
-        row.style.gridTemplateColumns=`80px repeat(${bins},1fr)`;
-        row.style.gap='8px';
-
-        let tag = document.createElement('div');
-        tag.textContent='Shelf '+shelfLetter(s);
-        row.appendChild(tag);
-
-        for(let b=0;b<bins;b++){
-          let item = rackState.find(x=>x.shelfIndex===s && x.binIndex===b);
-
-          let tile = document.createElement('div');
-          tile.style.border='1px solid rgba(255,255,255,.1)';
-          tile.style.padding='8px';
-
-          tile.innerHTML = `
-            <div>${compactCode(item.rack,s,b,item.positions)}</div>
-            <select data-s="${s}" data-b="${b}">
-              ${[1,2,3,4,5].map(n=>`<option ${item.positions===n?'selected':''}>${n}</option>`).join('')}
-            </select>
-          `;
-
-          row.appendChild(tile);
-        }
-
-        rackMap.appendChild(row);
-      }
-
-      rackMap.querySelectorAll('select').forEach(sel=>{
-        sel.addEventListener('change', e=>{
-          let s = parseInt(e.target.dataset.s);
-          let b = parseInt(e.target.dataset.b);
-          let item = rackState.find(x=>x.shelfIndex===s && x.binIndex===b);
-          item.positions = parseInt(e.target.value);
-          renderMap();
-          renderList();
         });
-      });
-    }
+      }
 
-    function renderList(){
-      binListBody.innerHTML='';
+      function drawList(){
+        listEl.innerHTML = '';
 
-      rackState.forEach(item=>{
-        expanded(item.rack,item.shelfIndex,item.binIndex,item.positions)
-        .forEach(loc=>{
-          let tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${loc}</td>
-            <td><input></td>
-            <td><input></td>
-            <td><input></td>
-            <td><input></td>
-            <td>${loc}</td>
-          `;
-          binListBody.appendChild(tr);
+        state.forEach(item => {
+          expand(item).forEach(loc => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${loc}</td>
+              <td><input type="text"/></td>
+              <td><input type="text"/></td>
+              <td><input type="text" inputmode="numeric"/></td>
+              <td><input type="text" inputmode="numeric"/></td>
+              <td class="qrCell">${loc}</td>
+            `;
+            listEl.appendChild(tr);
+          });
         });
+      }
+
+      function buildAll(){
+        buildState();
+        drawMap();
+        drawList();
+      }
+
+      function csvFromTable(){
+        const rows = [['Bin Location','Part Number','Description','Min Stock','Max Stock','QR Code']];
+
+        Array.from(listEl.querySelectorAll('tr')).forEach(tr => {
+          const inputs = tr.querySelectorAll('input');
+          rows.push([
+            tr.children[0].innerText.trim(),
+            inputs[0].value.trim(),
+            inputs[1].value.trim(),
+            inputs[2].value.trim(),
+            inputs[3].value.trim(),
+            tr.children[5].innerText.trim()
+          ]);
+        });
+
+        return rows.map(row =>
+          row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')
+        ).join('\\n');
+      }
+
+      buildBtn.addEventListener('click', buildAll);
+
+      resetBtn.addEventListener('click', () => {
+        rackEl.value = '1';
+        shelvesEl.value = '4';
+        binsEl.value = '6';
+        positionsEl.value = '1';
+        buildAll();
       });
-    }
 
-    function buildAll(){
-      buildState();
-      renderMap();
-      renderList();
-    }
+      copyCsvBtn.addEventListener('click', async () => {
+        try{
+          await navigator.clipboard.writeText(csvFromTable());
+          alert('CSV copied');
+        }catch(err){
+          alert('Clipboard copy is not available on this device/browser.');
+        }
+      });
 
-    buildBtn.onclick = buildAll;
-
-    resetBtn.onclick = () => {
-      rackNumberEl.value=1;
-      shelfCountEl.value=4;
-      binsPerShelfEl.value=6;
-      defaultPositionsEl.value=1;
       buildAll();
-    };
-
-    copyCsvBtn.onclick = () => {
-      alert('CSV copy coming next step');
-    };
-
-    buildAll();
-
-  } catch(e) {
-    alert('Script error: ' + e.message);
-  }
-})();
-</script>
+    });
+  </script>
+</body>
+</html>
