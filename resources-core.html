@@ -199,19 +199,19 @@
         </div>
         <div>
           <label for="rack">Rack number</label>
-          <input id="rack" type="number" min="1" max="99" value="1"/>
+          <input id="rack" type="number" min="0" max="99" value="0"/>
         </div>
         <div>
           <label for="shelves">Number of shelves</label>
-          <input id="shelves" type="number" min="1" max="26" value="4"/>
+          <input id="shelves" type="number" min="0" max="26" value="0"/>
         </div>
         <div>
           <label for="bins">Bins per shelf</label>
-          <input id="bins" type="number" min="1" max="99" value="6"/>
+          <input id="bins" type="number" min="0" max="99" value="0"/>
         </div>
         <div>
           <label for="positions">Default positions per bin</label>
-          <input id="positions" type="number" min="1" max="26" value="1"/>
+          <input id="positions" type="number" min="0" max="26" value="0"/>
         </div>
       </div>
 
@@ -222,8 +222,7 @@
       </div>
 
       <div class="note">
-        “Send Map Pack” will download two CSV files and open an email draft.
-        The user will still need to manually attach the downloaded files to the email.
+        “Send Map Pack” downloads both CSV files first, then opens the email draft so you only need to attach the downloaded files.
       </div>
     </div>
 
@@ -294,31 +293,51 @@
         return out;
       }
 
+      function clearOutputs(){
+        state = [];
+        mapEl.innerHTML = '';
+        listEl.innerHTML = '';
+      }
+
       function buildState(){
-        const rack = pad(Math.max(1, Math.min(99, parseInt(rackEl.value || '1', 10))));
-        const shelves = Math.max(1, Math.min(26, parseInt(shelvesEl.value || '1', 10)));
-        const bins = Math.max(1, Math.min(99, parseInt(binsEl.value || '1', 10)));
-        const pos = Math.max(1, Math.min(26, parseInt(positionsEl.value || '1', 10)));
+        const rackNumber = parseInt(rackEl.value || '0', 10);
+        const shelves = parseInt(shelvesEl.value || '0', 10);
+        const bins = parseInt(binsEl.value || '0', 10);
+        const pos = parseInt(positionsEl.value || '0', 10);
+
+        if(rackNumber <= 0 || shelves <= 0 || bins <= 0 || pos <= 0){
+          clearOutputs();
+          return false;
+        }
+
+        const rack = pad(Math.min(99, rackNumber));
+        const safeShelves = Math.min(26, shelves);
+        const safeBins = Math.min(99, bins);
+        const safePos = Math.min(26, pos);
 
         state = [];
 
-        for(let s = 0; s < shelves; s++){
-          for(let b = 0; b < bins; b++){
+        for(let s = 0; s < safeShelves; s++){
+          for(let b = 0; b < safeBins; b++){
             state.push({
               rack,
               s,
               b,
-              pos
+              pos: safePos
             });
           }
         }
+
+        return true;
       }
 
       function drawMap(){
         mapEl.innerHTML = '';
 
-        const shelves = Math.max(1, Math.min(26, parseInt(shelvesEl.value || '1', 10)));
-        const bins = Math.max(1, Math.min(99, parseInt(binsEl.value || '1', 10)));
+        const shelves = parseInt(shelvesEl.value || '0', 10);
+        const bins = parseInt(binsEl.value || '0', 10);
+
+        if(shelves <= 0 || bins <= 0 || !state.length) return;
 
         for(let s = 0; s < shelves; s++){
           const row = document.createElement('div');
@@ -363,6 +382,7 @@
 
       function drawList(){
         listEl.innerHTML = '';
+        if(!state.length) return;
 
         state.forEach(item => {
           expand(item).forEach(loc => {
@@ -381,7 +401,8 @@
       }
 
       function buildAll(){
-        buildState();
+        const built = buildState();
+        if(!built) return;
         drawMap();
         drawList();
       }
@@ -462,7 +483,8 @@
         }
 
         const customer = customerNameEl.value.trim() || 'Customer';
-        const rack = pad(Math.max(1, Math.min(99, parseInt(rackEl.value || '1', 10))));
+        const rackNumber = parseInt(rackEl.value || '0', 10);
+        const rack = rackNumber > 0 ? pad(Math.min(99, rackNumber)) : '00';
 
         const subject = `Rack Map Pack | ${customer} | Rack ${rack}`;
         const body = [
@@ -470,7 +492,7 @@
           ``,
           `Please find the rack map pack for ${customer}, Rack ${rack}.`,
           ``,
-          `Two files have just been downloaded from the tool:`,
+          `Two CSV files have just been downloaded from the tool:`,
           `- Customer Form CSV`,
           `- Internal Master CSV`,
           ``,
@@ -488,16 +510,22 @@
       resetBtn.addEventListener('click', () => {
         customerNameEl.value = '';
         sendEmailEl.value = '';
-        rackEl.value = '1';
-        shelvesEl.value = '4';
-        binsEl.value = '6';
-        positionsEl.value = '1';
-        buildAll();
+        rackEl.value = '0';
+        shelvesEl.value = '0';
+        binsEl.value = '0';
+        positionsEl.value = '0';
+        clearOutputs();
       });
 
       sendPackBtn.addEventListener('click', () => {
+        if(!listEl.querySelector('tr')){
+          alert('Build the rack before sending the map pack.');
+          return;
+        }
+
         const customer = (customerNameEl.value.trim() || 'customer').replace(/[^a-z0-9_-]/gi, '-');
-        const rack = pad(Math.max(1, Math.min(99, parseInt(rackEl.value || '1', 10))));
+        const rackNumber = parseInt(rackEl.value || '0', 10);
+        const rack = rackNumber > 0 ? pad(Math.min(99, rackNumber)) : '00';
 
         const customerCsv = rowsToCsv(getCustomerRows());
         const internalCsv = rowsToCsv(getInternalRows());
@@ -505,10 +533,12 @@
         downloadFile(`customer-form-rack-${rack}-${customer}.csv`, customerCsv, 'text/csv;charset=utf-8');
         downloadFile(`internal-master-rack-${rack}-${customer}.csv`, internalCsv, 'text/csv;charset=utf-8');
 
-        setTimeout(openMailDraft, 400);
+        setTimeout(() => {
+          openMailDraft();
+        }, 900);
       });
 
-      buildAll();
+      clearOutputs();
     });
   </script>
 </body>
