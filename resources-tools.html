@@ -641,6 +641,28 @@ const ShiftRec = {
     if (table) table.style.display = hasRows ? 'table' : 'none';
     if (empty) empty.style.display = hasRows ? 'none' : 'block';
   },
+  getSelectedBranch(){
+    const candidates = [];
+
+    try {
+      const activeStore = localStorage.getItem('activeStoreTemplate');
+      if (activeStore) candidates.push(activeStore);
+    } catch(e) {}
+
+    const storePill = document.getElementById('storeNamePill');
+    if (storePill && storePill.textContent) candidates.push(storePill.textContent);
+
+    const headerStore = document.querySelector('.bw-store-label');
+    if (headerStore && headerStore.textContent) candidates.push(headerStore.textContent);
+
+    return (candidates.find(value => String(value).trim()) || '').trim();
+  },
+  prefillBranchFromSelectedStore(){
+    const branchInput = document.getElementById('cuBranch');
+    if (!branchInput || branchInput.value) return;
+    const selectedBranch = this.getSelectedBranch();
+    if (selectedBranch) branchInput.value = selectedBranch;
+  },
   addCheque(){
     const body = document.getElementById('cuChequeBody');
     if (!body) return;
@@ -656,6 +678,12 @@ const ShiftRec = {
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       dateInput.value = now.toISOString().slice(0, 10);
+    }
+
+    const branchInput = document.getElementById('cuBranch');
+    if (branchInput && !branchInput.value) {
+      const selectedBranch = this.getSelectedBranch();
+      if (selectedBranch) branchInput.value = selectedBranch;
     }
     document.addEventListener('input', event => {
       if (event.target && event.target.closest('#shift-reconcilliation')) this.calculate();
@@ -680,7 +708,15 @@ const ShiftRec = {
         this.calculate();
       }
     }, true);
+    window.addEventListener('storage', event => {
+      if (event.key === 'activeStoreTemplate') this.prefillBranchFromSelectedStore();
+    });
+    window.addEventListener('bw:change-store', () => {
+      setTimeout(() => this.prefillBranchFromSelectedStore(), 100);
+    });
+
     this.updateCheques();
+    this.prefillBranchFromSelectedStore();
     this.calculate();
   }
 };
