@@ -714,6 +714,9 @@ const ShiftRec = {
     window.addEventListener('bw:change-store', () => {
       setTimeout(() => this.prefillBranchFromSelectedStore(), 100);
     });
+    window.addEventListener('bw:store-changed', () => {
+      setTimeout(() => this.prefillBranchFromSelectedStore(), 100);
+    });
 
     this.updateCheques();
     this.prefillBranchFromSelectedStore();

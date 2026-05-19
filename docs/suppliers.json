@@ -2,10 +2,11 @@
   "version": 1,
   "stores": [
     "Bayswater",
-    "Dandenong",
-    "Thomastown",
     "Cairns",
-    "Sunshine"
+    "Dandenong",
+    "Sunshine",
+    "Thomastown",
+    "Admin"
   ],
   "data": {
     "Default": {
@@ -46,6 +47,7 @@
     "Dandenong": {},
     "Thomastown": {},
     "Cairns": {},
-    "Sunshine": {}
+    "Sunshine": {},
+    "Admin": {}
   }
 }

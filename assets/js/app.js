@@ -1267,7 +1267,7 @@ document.addEventListener('DOMContentLoaded',()=>{globalInit();setupSearch();if(
       function fill(sel){
         if(!sel) return;
         sel.innerHTML = "";
-        (shared.stores || ["Default"]).forEach(n=>{
+        STORE_OPTIONS.forEach(n=>{
           const opt=document.createElement("option");
           opt.value=n; opt.textContent=n;
           sel.appendChild(opt);
@@ -1508,6 +1508,7 @@ document.addEventListener('DOMContentLoaded',()=>{globalInit();setupSearch();if(
 (function(){
   const SUPPLIERS_URL = new URL(window.__bwRepoBase() + "docs/suppliers.json", location.origin).href;
   const KEY_ACTIVE_STORE = "activeStoreTemplate";
+  const STORE_OPTIONS = ["Bayswater","Cairns","Dandenong","Sunshine","Thomastown","Admin"];
 
   function isProductGuide(){
     return /product-guide\.html($|\?)/.test(location.href);
@@ -1526,14 +1527,11 @@ document.addEventListener('DOMContentLoaded',()=>{globalInit();setupSearch();if(
   }
 
   function getActiveStore(shared){
+    const stores = STORE_OPTIONS;
     const stored = localStorage.getItem(KEY_ACTIVE_STORE);
-    if(stored && shared.stores && shared.stores.includes(stored)) return stored;
-    if(shared.stores && shared.stores.length){
-      localStorage.setItem(KEY_ACTIVE_STORE, shared.stores[0]);
-      return shared.stores[0];
-    }
-    localStorage.setItem(KEY_ACTIVE_STORE, "Default");
-    return "Default";
+    if(stored && stores.includes(stored)) return stored;
+    localStorage.setItem(KEY_ACTIVE_STORE, stores[0]);
+    return stores[0];
   }
 
   function setActiveStore(name){
@@ -1621,7 +1619,7 @@ document.addEventListener('DOMContentLoaded',()=>{globalInit();setupSearch();if(
       const sel = document.getElementById("storeSelectorModal");
       const status = document.getElementById("storeSelectorModalStatus");
       sel.innerHTML = "";
-      (shared.stores || ["Default"]).forEach(n=>{
+      STORE_OPTIONS.forEach(n=>{
         const opt=document.createElement("option");
         opt.value=n; opt.textContent=n;
         sel.appendChild(opt);
