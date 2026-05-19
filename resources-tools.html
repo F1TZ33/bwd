@@ -221,6 +221,15 @@
   .cuDenoms input{width:76px;max-width:76px}
   .cuEftAmount,.cuDocketQty{width:88px;max-width:88px}
 }
+
+.cuLeftStack,.cuRightStack{min-width:0}
+.cuChequesFull{grid-column:1 / -1}
+.cuChequeTable{table-layout:auto}
+.cuChequeTable input{min-width:84px}
+@media(max-width:850px){
+  .cuChequesFull{grid-column:auto}
+}
+
 @media print{
   @page{size:A4 portrait;margin:5mm}
 
@@ -275,8 +284,9 @@
   }
   .cashupSheet h3{font-size:18px!important;margin:0 0 5px!important;text-align:left!important;color:#0b2f55!important}
 
-  .cuTopPrintGrid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:5mm!important;margin-bottom:4mm!important}
+  .cuTopPrintGrid{display:block!important;margin-bottom:4mm!important}
   .cuLayout{display:grid!important;grid-template-columns:1fr 1fr!important;gap:5mm!important;align-items:start!important}
+  .cuChequesFull{grid-column:1 / -1!important}
   .cuGrid4{display:grid!important;grid-template-columns:1fr 1fr!important;gap:2mm!important}
 
   .cuSection{
@@ -478,7 +488,7 @@
         </div>
 
         <div class="cashupSheet" data-builder="Designed and built by H. Fitzgerald">
-          <h3>End of Day Cash Up</h3>
+          <h3>Shift Details</h3>
 
           <div class="cuTopPrintGrid">
             <div class="cuSection">
@@ -492,51 +502,25 @@
                 </div>
               </div>
             </div>
-
-            <div class="cuSection cuSummary">
-              <div class="cuTitle">Summary</div>
-              <div class="cuBody">
-                <table>
-                  <thead><tr><th>Payment Type</th><th class="num">Expected Totals</th><th class="num">Counted Totals</th><th class="num">Variance</th></tr></thead>
-                  <tbody>
-                    <tr><td>EFT</td><td><input id="cuEftExpected" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></td><td class="num cuTotal" id="cuEftCounted">$0.00</td><td class="num" id="cuEftVariance">$0.00</td></tr>
-                    <tr><td>EFT Dockets</td><td><input id="cuDocketExpected" type="number" inputmode="numeric" step="1" placeholder="0"></td><td class="num cuTotal" id="cuDocketCounted">0</td><td class="num" id="cuDocketVariance">0</td></tr>
-                    <tr><td>Cash</td><td><input id="cuCashExpected" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></td><td class="num cuTotal" id="cuCashCounted">$0.00</td><td class="num" id="cuCashVariance">$0.00</td></tr>
-                    <tr><td>CHQ</td><td><input id="cuChqExpected" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></td><td class="num cuTotal" id="cuChqCounted">$0.00</td><td class="num" id="cuChqVariance">$0.00</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
 
           <div class="cuLayout">
-            <div class="cuSection">
-              <div class="cuTitle">Cash in the Till</div>
-              <div class="cuBody">
-                <table class="cuDenoms">
-                  <thead><tr><th>Denomination</th><th class="num">Units</th><th class="num">Value</th></tr></thead>
-                  <tbody>
-                    <tr><td>$100</td><td><input class="cuCashQty" data-value="100" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>$50</td><td><input class="cuCashQty" data-value="50" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>$20</td><td><input class="cuCashQty" data-value="20" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>$10</td><td><input class="cuCashQty" data-value="10" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>$5</td><td><input class="cuCashQty" data-value="5" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>$2</td><td><input class="cuCashQty" data-value="2" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>$1</td><td><input class="cuCashQty" data-value="1" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>50c</td><td><input class="cuCashQty" data-value="0.5" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>20c</td><td><input class="cuCashQty" data-value="0.2" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>10c</td><td><input class="cuCashQty" data-value="0.1" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                    <tr><td>5c</td><td><input class="cuCashQty" data-value="0.05" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
-                  </tbody>
-                </table>
-                <div class="cuTotalBox"><label>Cash Counted</label><div class="cuBig" id="cuCashTotal">$0.00</div></div>
-                <div class="cuTotalBox"><label>Branch Float</label><input id="cuBranchFloat" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></div>
-                <div class="cuTotalBox"><label>Banking Required</label><div class="cuBig" id="cuBankingRequired">$0.00</div></div>
-                <div class="cuNote">Cash summary / banking required = counted till cash less branch float. Negative values show as $0.00.</div>
+            <div class="cuLeftStack">
+              <div class="cuSection cuSummary">
+                <div class="cuTitle">Summary</div>
+                <div class="cuBody">
+                  <table>
+                    <thead><tr><th>Payment Type</th><th class="num">Expected Totals</th><th class="num">Counted Totals</th><th class="num">Variance</th></tr></thead>
+                    <tbody>
+                      <tr><td>EFT</td><td><input id="cuEftExpected" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></td><td class="num cuTotal" id="cuEftCounted">$0.00</td><td class="num" id="cuEftVariance">$0.00</td></tr>
+                      <tr><td>EFT Dockets</td><td><input id="cuDocketExpected" type="number" inputmode="numeric" step="1" placeholder="0"></td><td class="num cuTotal" id="cuDocketCounted">0</td><td class="num" id="cuDocketVariance">0</td></tr>
+                      <tr><td>Cash</td><td><input id="cuCashExpected" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></td><td class="num cuTotal" id="cuCashCounted">$0.00</td><td class="num" id="cuCashVariance">$0.00</td></tr>
+                      <tr><td>CHQ</td><td><input id="cuChqExpected" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></td><td class="num cuTotal" id="cuChqCounted">$0.00</td><td class="num" id="cuChqVariance">$0.00</td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
 
-            <div>
               <div class="cuSection">
                 <div class="cuTitle">EFT Machines</div>
                 <div class="cuBody">
@@ -551,14 +535,42 @@
                   <div class="cuTotalBox"><label>EFT Notes</label><textarea id="cuEftNotes"></textarea></div>
                 </div>
               </div>
+            </div>
 
+            <div class="cuRightStack">
               <div class="cuSection">
-                <div class="cuTitle">Cheques</div>
-                <div class="cuBody cuChequeScroll">
-                  <div id="cuEmptyCheques" class="cuEmptyCheques">No cheques entered.</div>
-                  <table class="cuChequeTable" id="cuChequeTable" style="display:none"><thead><tr><th>Name</th><th>Account</th><th class="num">Amount</th><th>Cheque No</th><th>BSB</th><th>Acc No</th><th></th></tr></thead><tbody id="cuChequeBody"></tbody></table>
-                  <button type="button" class="cuAddBtn" id="cuAddChequeBtn">Add Cheque</button>
+                <div class="cuTitle">Cash in the Till</div>
+                <div class="cuBody">
+                  <table class="cuDenoms">
+                    <thead><tr><th>Denomination</th><th class="num">Units</th><th class="num">Value</th></tr></thead>
+                    <tbody>
+                      <tr><td>$100</td><td><input class="cuCashQty" data-value="100" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>$50</td><td><input class="cuCashQty" data-value="50" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>$20</td><td><input class="cuCashQty" data-value="20" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>$10</td><td><input class="cuCashQty" data-value="10" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>$5</td><td><input class="cuCashQty" data-value="5" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>$2</td><td><input class="cuCashQty" data-value="2" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>$1</td><td><input class="cuCashQty" data-value="1" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>50c</td><td><input class="cuCashQty" data-value="0.5" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>20c</td><td><input class="cuCashQty" data-value="0.2" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>10c</td><td><input class="cuCashQty" data-value="0.1" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                      <tr><td>5c</td><td><input class="cuCashQty" data-value="0.05" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></td><td class="num cuCashLine">$0.00</td></tr>
+                    </tbody>
+                  </table>
+                  <div class="cuTotalBox"><label>Cash Counted</label><div class="cuBig" id="cuCashTotal">$0.00</div></div>
+                  <div class="cuTotalBox"><label>Branch Float</label><input id="cuBranchFloat" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></div>
+                  <div class="cuTotalBox"><label>Banking Required</label><div class="cuBig" id="cuBankingRequired">$0.00</div></div>
+                  <div class="cuNote">Cash summary / banking required = counted till cash less branch float. Negative values show as $0.00.</div>
                 </div>
+              </div>
+            </div>
+
+            <div class="cuSection cuChequesFull">
+              <div class="cuTitle">Cheques</div>
+              <div class="cuBody cuChequeScroll">
+                <div id="cuEmptyCheques" class="cuEmptyCheques">No cheques entered.</div>
+                <table class="cuChequeTable" id="cuChequeTable" style="display:none"><thead><tr><th>Name</th><th>Account</th><th class="num">Amount</th><th>Cheque No</th><th>BSB</th><th>Acc No</th><th></th></tr></thead><tbody id="cuChequeBody"></tbody></table>
+                <button type="button" class="cuAddBtn" id="cuAddChequeBtn">Add Cheque</button>
               </div>
             </div>
           </div>
