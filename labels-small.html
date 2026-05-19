@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Small Avery Labels</title>
+<style>
+@page { size:A4; margin:0; }
+body{
+  margin:0;
+  padding:6mm;
+  font-family:Arial,sans-serif;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+}
+*{ box-sizing:border-box; }
+
+.sheet{
+  display:grid;
+  grid-template-columns:repeat(3,61mm);
+  grid-auto-rows:22mm;
+  gap:0;
+}
+
+.label{
+  width:61mm;
+  height:22mm;
+  display:flex;
+  align-items:center;
+  gap:2mm;
+  padding:1mm;
+  overflow:hidden;
+}
+
+.qr{
+  width:18mm;
+  height:18mm;
+  flex-shrink:0;
+}
+
+.text{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  width:38mm;
+}
+
+.part{
+  font-size:10pt;
+  font-weight:700;
+  line-height:1;
+}
+
+.desc{
+  font-size:7pt;
+  line-height:1;
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="label">
+    <img class="qr" src="bw-qr-placeholder.png">
+    <div class="text">
+      <div class="part">6205-2RS</div>
+      <div class="desc">Deep Groove Bearing</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
